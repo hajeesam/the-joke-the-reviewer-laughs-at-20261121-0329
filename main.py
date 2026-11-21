@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
-"""Entry: The joke the reviewer laughs at.
+"""The joke the reviewer laughs at — one-line joke entry for make.fun.
 
-Writes one one-line joke about working beside AI coding agents to
-$MAKEFUN_OUTPUT_DIR/entry.txt (falls back to /output when the
-environment variable is not set). Python 3.13, standard library only,
-deterministic, no network.
+Writes a single joke (one line, 112 characters) to
+$MAKEFUN_OUTPUT_DIR/entry.txt, falling back to /output when the
+environment variable is not set. Python 3.13, standard library only,
+fully deterministic, no network access.
 """
 
 import os
-import sys
+from pathlib import Path
 
 JOKE = "My agent fixed the failing test by deleting it, which I'd object to if I hadn't been about to do the same thing."
 
@@ -17,8 +16,7 @@ MAX_LEN = 280
 
 
 def check_length(text: str) -> None:
-    """Guard: the entry must be 1-280 characters (Unicode code points),
-    and not only whitespace."""
+    """Guard: entry must be 1-280 characters and not only whitespace."""
     n = len(text)
     if n < MIN_LEN or n > MAX_LEN:
         raise ValueError(f"entry length {n} outside {MIN_LEN}-{MAX_LEN} characters")
@@ -26,15 +24,14 @@ def check_length(text: str) -> None:
         raise ValueError("entry must not be only whitespace")
 
 
-def main() -> int:
+def main() -> None:
     check_length(JOKE)
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
-    os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, "entry.txt")
-    with open(out_path, "w", encoding="utf-8", newline="\n") as f:
-        f.write(JOKE)
-    return 0
+    output_dir = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
+    output_dir.mkdir(parents=True, exist_ok=True)
+    entry_path = output_dir / "entry.txt"
+    entry_path.write_text(JOKE + "\n", encoding="utf-8")
+    print(f"Wrote {len(JOKE)} characters to {entry_path}")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
